@@ -12,8 +12,8 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      RMD_PATH: "analysis/paper/paper.Rmd"
-      BUILD_DIR: "analysis/paper"
+      RMD_PATH: "./analysis/paper/paper.Rmd"
+      BUILD_DIR: "./analysis/paper"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
