@@ -42,9 +42,15 @@ jobs:
         id: render
         run: |
           Rscript -e "f <- commandArgs(TRUE); f <- rmarkdown::render(f, 'all', 'index'); write(gsub(paste0(getwd(), '/'), '', f, fixed = TRUE), 'results.txt')" ${RMD_PATH}
-          echo '::set-output name=BuildDir::$(Rscript -e "cat(dirname(commandArgs(TRUE)))" ${RMD_PATH})'
-          echo '::set-output name=HtmlPath::$(cat results.txt | grep .html)'
-          echo '::set-output name=PdfPath::$(cat results.txt  | grep .pdf)'
+          echo '::set-output name=BuildDir::$(Rscript -e "cat(dirname(commandArgs(TRUE)))" ${RMD_PATH})\n'
+          echo '::set-output name=HtmlPath::$(cat results.txt | grep .html)\n'
+          echo '::set-output name=PdfPath::$(cat results.txt  | grep .pdf)\n'
+
+      - name: Debug
+        run: |
+          echo '${{steps.github_release.outputs.BuildDir}}\n'
+          echo '${{steps.github_release.outputs.HtmlPath}}\n'
+          echo '${{steps.github_release.outputs.PdfPath}}\n'
 
       - name: Upload rendered PDF
         if: success()
