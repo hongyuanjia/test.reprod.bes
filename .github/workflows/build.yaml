@@ -40,13 +40,16 @@ jobs:
 
       - name: Render Rmarkdown file
         run: |
-          Rscript -e 'f <- commandArgs(TRUE); if (file.exists(f)) {if (dir.exists("docs")) unlink("docs", TRUE); dir.create("docs"); file.copy(f, "docs/index.Rmd")' ${RMD_PATH}
-          Rscript -e 'rmarkdown::render("docs/index.Rmd", "all"); if (file.exists("docs/index.pdf")) file.rename("docs/paper.pdf")}'
+          Rscript -e 'f <- commandArgs(TRUE); rmarkdown::render(f, "all", "index")' ${RMD_PATH}
+
+      - name: Get build_dir
+        run: |
+          echo $(dirname "${RMD_PATH}") >> $BUILD_DIR
 
       - name: Deploy to GitHub Pages
         if: success()
         uses: crazy-max/ghaction-github-pages@v2
         with:
           target_branch: gh-pages
-          build_dir: docs
+          build_dir: ${BUILD_DIR}
           jekyll: false

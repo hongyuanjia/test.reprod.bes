@@ -362,6 +362,11 @@
       "Repository": "CRAN",
       "Hash": "06c85365a03fdaf699966cc1d3cf53ea"
     },
+    "rticles": {
+      "Package": "rticles",
+      "Version": "0.19",
+      "Source": "Repository"
+    },
     "scales": {
       "Package": "scales",
       "Version": "1.1.1",
