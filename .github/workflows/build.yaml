@@ -13,6 +13,7 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       RMD_PATH: "analysis/paper/paper.Rmd"
+      BUILD_DIR: "analysis/paper"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -41,10 +42,6 @@ jobs:
       - name: Render Rmarkdown file
         run: |
           Rscript -e 'f <- commandArgs(TRUE); rmarkdown::render(f, "all", "index")' ${RMD_PATH}
-
-      - name: Get build_dir
-        run: |
-          echo "$(dirname "${RMD_PATH}")" >> $BUILD_DIR
 
       - name: Deploy to GitHub Pages
         if: success()
