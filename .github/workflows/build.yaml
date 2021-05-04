@@ -44,7 +44,7 @@ jobs:
 
       - name: Get build_dir
         run: |
-          echo $(dirname "${RMD_PATH}") >> $BUILD_DIR
+          echo "$(dirname "${RMD_PATH}")" >> $BUILD_DIR
 
       - name: Deploy to GitHub Pages
         if: success()
