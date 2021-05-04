@@ -37,7 +37,8 @@ linenumbers: true
 numbersections: true
 colorlinks: true
 link-citations: true
-biblio-style: elsarticle-num
+biblio-style: elsarticle-num-names
+download: true
 header-includes:
   - \biboptions{sort&compress}
   - \hypersetup{bookmarksnumbered=true}
@@ -86,6 +87,10 @@ options(knitr.table.format = function() {
 })
 
 library(ggplot2)
+```
+
+```{r eval = isTRUE(rmarkdown::metadata$download) && knitr::is_html_output()}
+knitr::asis_output('<a href="paper.pdf"><b>[&#x21b7; Download PDF]</b></a>')
 ```
 
 # Highlights {.unnumbered}
