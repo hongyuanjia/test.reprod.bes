@@ -1,0 +1,51 @@
+on:
+  push:
+    branches:
+      - main
+      - master
+
+name: build
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RMD_PATH: "analysis/paper/paper.Rmd"
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v1
+
+      - name: Setup Pandoc
+        uses: r-lib/actions/setup-pandoc@v1
+
+      - name: Setup TinyTeX
+        uses: r-lib/actions/setup-tinytex@v1
+
+      - name: Cache Renv packages
+        uses: actions/cache@v2
+        with:
+          path: $HOME/.local/share/renv
+          key: r-${{ hashFiles('renv.lock') }}
+          restore-keys: r-
+
+      - name: Install packages
+        run: |
+          R -e 'install.packages("renv")'
+          R -e 'renv::restore()'
+
+      - name: Render Rmarkdown file
+        run: |
+          Rscript -e 'f <- commandArgs(TRUE); if (file.exists(f)) {if (dir.exists("docs")) unlink("docs", TRUE); dir.create("docs"); file.copy(f, "docs/index.Rmd")' ${RMD_PATH}
+          Rscript -e 'rmarkdown::render("docs/index.Rmd", "all"); if (file.exists("docs/index.pdf")) file.rename("docs/paper.pdf")}'
+
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: gh-pages
+          build_dir: public
