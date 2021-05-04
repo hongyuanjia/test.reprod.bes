@@ -48,9 +48,9 @@ jobs:
 
       - name: Debug
         run: |
-          echo '${{steps.github_release.outputs.BuildDir}}\n'
-          echo '${{steps.github_release.outputs.HtmlPath}}\n'
-          echo '${{steps.github_release.outputs.PdfPath}}\n'
+          echo '${{steps.render.outputs.BuildDir}}\n'
+          echo '${{steps.render.outputs.HtmlPath}}\n'
+          echo '${{steps.render.outputs.PdfPath}}\n'
 
       - name: Upload rendered PDF
         if: success()
