@@ -41,7 +41,6 @@ jobs:
         id: render-rmd
         run: |
           Rscript -e 'f <- commandArgs(TRUE); f <- rmarkdown::render(f, "all", sprintf("paper-%s", Sys.getenv("GITHUB.REF")), output_options = list(self_contained = TRUE)); write(gsub(paste0(getwd(), "/"), "", f, fixed = TRUE), "results.txt")' ${RMD_PATH}
-          Rscript -e 'f <- readLines("results.txt"); pdf <- grep(".pdf", results, fixed = TRUE); if (length(pdf)) {paper <- file.path(dirname(f[pdf]), "paper.pdf"); file.rename(f[pdf], paper); f[pdf] <- paper; write(f, "results.txt")}'
           echo "::set-output name=build_dir::$(Rscript -e 'cat(dirname(commandArgs(TRUE)))' ${RMD_PATH})"
           echo "::set-output name=html_path::$(cat results.txt | grep .html)"
           echo "::set-output name=pdf_path::$(cat results.txt  | grep .pdf)"
