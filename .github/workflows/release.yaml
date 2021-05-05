@@ -1,0 +1,77 @@
+on:
+  push:
+    tag:
+      - 'v*'
+
+name: build
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RMD_PATH: analysis/paper/paper.Rmd
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v1
+
+      - name: Setup Pandoc
+        uses: r-lib/actions/setup-pandoc@v1
+
+      - name: Setup TinyTeX
+        uses: r-lib/actions/setup-tinytex@v1
+
+      - name: Cache Renv packages
+        uses: actions/cache@v2
+        with:
+          path: $HOME/.local/share/renv
+          key: r-${{ hashFiles('renv.lock') }}
+          restore-keys: r-
+
+      - name: Install packages
+        run: |
+          R -e 'install.packages("renv")'
+          R -e 'renv::restore()'
+
+      - name: Render Rmarkdown file
+        id: render-rmd
+        run: |
+          Rscript -e 'f <- commandArgs(TRUE); f <- rmarkdown::render(f, "all", sprintf("paper-%s", Sys.getenv("GITHUB.REF")), output_options = list(self_contained = TRUE)); write(gsub(paste0(getwd(), "/"), "", f, fixed = TRUE), "results.txt")' ${RMD_PATH}
+          Rscript -e 'f <- readLines("results.txt"); pdf <- grep(".pdf", results, fixed = TRUE); if (length(pdf)) {paper <- file.path(dirname(f[pdf]), "paper.pdf"); file.rename(f[pdf], paper); f[pdf] <- paper; write(f, "results.txt")}'
+          echo "::set-output name=build_dir::$(Rscript -e 'cat(dirname(commandArgs(TRUE)))' ${RMD_PATH})"
+          echo "::set-output name=html_path::$(cat results.txt | grep .html)"
+          echo "::set-output name=pdf_path::$(cat results.txt  | grep .pdf)"
+
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v1
+        with:
+          commitMode: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create HTML Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          file: ${{steps.render-rmd.outputs.html_path}}
+          overwrite: true
+          body: ${{steps.github_release.outputs.changelog}}
+          overwrite: true
+          file_glob: true
+
+      - name: Create PDF Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          file: ${{steps.render-rmd.outputs.pdf_path}}
+          overwrite: true
+          body: ${{steps.github_release.outputs.changelog}}
+          overwrite: true
+          file_glob: true
