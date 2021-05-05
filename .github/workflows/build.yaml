@@ -42,25 +42,28 @@ jobs:
         id: render-rmd
         run: |
           Rscript -e 'f <- commandArgs(TRUE); f <- rmarkdown::render(f, "all", "index"); write(gsub(paste0(getwd(), "/"), "", f, fixed = TRUE), "results.txt")' ${RMD_PATH}
-          echo '::set-output name=BuildDir::$(Rscript -e "cat(dirname(commandArgs(TRUE)))" ${RMD_PATH})\n'
-          echo '::set-output name=HtmlPath::$(cat results.txt | grep .html)\n'
-          echo '::set-output name=PdfPath::$(cat results.txt  | grep .pdf)\n'
+          echo "::set-output name=build_dir::$(Rscript -e 'cat(dirname(commandArgs(TRUE)))' ${RMD_PATH})\n"
+          echo "::set-output name=html_path::$(cat results.txt | grep .html)\n"
+          echo "::set-output name=pdf_path::$(cat results.txt  | grep .pdf)\n"
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      - name: Echo
+        run: |
+          echo '${{steps.render-rmd.outputs.build_dir}}'
+          echo '${{steps.render-rmd.outputs.html_path}}'
+          echo '${{steps.render-rmd.outputs.pdf_path}}'
 
       - name: Upload rendered PDF
         if: success()
         uses: actions/upload-artifact@v2
         with:
           name: PDF
-          path: ${{steps.render-rmd.outputs.PdfPath}}
+          path: ${{steps.render-rmd.outputs.pdf_path}}
 
       - name: Deploy to GitHub Pages
         if: success()
         uses: crazy-max/ghaction-github-pages@v2
         with:
           target_branch: gh-pages
-          build_dir: ${{steps.render-rmd.outputs.BuildDir}}
+          build_dir: ${{steps.render-rmd.outputs.build_dir}}
           jekyll: false
           keep_history: true
