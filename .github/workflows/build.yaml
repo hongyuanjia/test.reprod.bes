@@ -39,7 +39,7 @@ jobs:
           R -e 'renv::restore()'
 
       - name: Render Rmarkdown file
-        id: render
+        id: render-rmd
         run: |
           Rscript -e 'f <- commandArgs(TRUE); f <- rmarkdown::render(f, "all", "index"); write(gsub(paste0(getwd(), "/"), "", f, fixed = TRUE), "results.txt")' ${RMD_PATH}
           echo '::set-output name=BuildDir::$(Rscript -e "cat(dirname(commandArgs(TRUE)))" ${RMD_PATH})\n'
@@ -54,13 +54,13 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: PDF
-          path: ${{steps.render.outputs.PdfPath}}
+          path: ${{steps.render-rmd.outputs.PdfPath}}
 
       - name: Deploy to GitHub Pages
         if: success()
         uses: crazy-max/ghaction-github-pages@v2
         with:
           target_branch: gh-pages
-          build_dir: ${{steps.render.outputs.BuildDir}}
+          build_dir: ${{steps.render-rmd.outputs.BuildDir}}
           jekyll: false
           keep_history: true
