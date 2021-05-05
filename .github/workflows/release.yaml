@@ -3,7 +3,7 @@ on:
     tag:
       - 'v*'
 
-name: build
+name: release
 
 jobs:
   build:
