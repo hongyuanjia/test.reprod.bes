@@ -40,7 +40,7 @@ jobs:
       - name: Render Rmarkdown file
         id: render-rmd
         run: |
-          Rscript -e 'f <- commandArgs(TRUE); f <- rmarkdown::render(f, "all", sprintf("paper-%s", Sys.getenv("GITHUB.REF")), output_options = list(self_contained = TRUE)); write(gsub(paste0(getwd(), "/"), "", f, fixed = TRUE), "results.txt")' ${RMD_PATH}
+          Rscript -e 'library(rmarkdown); f <- commandArgs(TRUE); fmts <- all_output_formats(f); nm <- sprintf("paper-%s", Sys.getenv("GITHUB.REF")); p <- c(); for (fmt in fmts) { opts <- if (fmt == "distill_article") list(self_contained = TRUE) else NULL; p <- c(p, render(f, fmt, nm, output_options = opts)); }; write(relative_to(getwd(), p), "results.txt")' ${RMD_PATH}
           echo "::set-output name=build_dir::$(Rscript -e 'cat(dirname(commandArgs(TRUE)))' ${RMD_PATH})"
           echo "::set-output name=html_path::$(cat results.txt | grep .html)"
           echo "::set-output name=pdf_path::$(cat results.txt  | grep .pdf)"
