@@ -60,7 +60,6 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
           file: ${{steps.render-rmd.outputs.html_path}}
-          overwrite: true
           body: ${{steps.github_release.outputs.changelog}}
           overwrite: true
           file_glob: true
@@ -71,7 +70,6 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
           file: ${{steps.render-rmd.outputs.pdf_path}}
-          overwrite: true
           body: ${{steps.github_release.outputs.changelog}}
           overwrite: true
           file_glob: true
